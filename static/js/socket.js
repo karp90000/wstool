@@ -91,7 +91,18 @@ var Vm = new Vue({
                         if (!_this.recvPause) {
                             var data = ev.data
                             if (_this.recvClean) _this.messageData = [];
-                            _this.writeNews(0, data);
+
+                            // Blob 对象需要先转换为 ArrayBuffer，才能被 Pako 正确解压缩
+                            let reader = new FileReader();
+                            reader.readAsArrayBuffer(data,'utf-8');
+                            reader.onload = function(){
+                                console.log("blob转arrayBuffer", reader.result);
+                                let inflatedData = pako.inflate(reader.result, {
+                                    to:"string"
+                                })
+
+                                _this.writeNews(0, inflatedData);
+                            }
                         }
                     }
                     this.instance        = wsInstance;
